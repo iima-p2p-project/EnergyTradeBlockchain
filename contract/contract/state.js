@@ -133,8 +133,8 @@ validatetrade(value){
     var s_start_reading=orderjdata.Seller_METER_READING_S;
     var b_end_reading=orderjdata.Buyer_METER_READING_E;
     var s_end_reading=orderjdata.Seller_METER_READING_E;
-    var p_consumed=b_start_reading-b_end_reading;
-    var p_produced=s_start_reading-s_end_reading;
+    var p_consumed=b_end_reading-b_start_reading;
+    var p_produced=s_end_reading-s_start_reading;
     var units=orderjdata.units;
     var B_Fine=0;
     var S_Fine=0;
