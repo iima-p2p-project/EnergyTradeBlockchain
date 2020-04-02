@@ -12,6 +12,7 @@ class EnergyTradeState {
 
  
 createorder(value) {
+  try{
 var  address=makeAddress(value.Seller_UserID+value.CREATED_TIMESTAMP);
 var stateEntriesSend = {}
   stateEntriesSend[address] = Buffer.from(JSON.stringify(value));
@@ -24,9 +25,14 @@ console.log("Order Created", result)
 }).catch(function(error) {
      console.error("Error While Creating Order", error)
    })
+  }
+  catch(err){
+    console.error("Error while Creating order", error);
+  }
  }
 
 updateorder(value){
+  try{
   const address = value.orderid;
   var updatedorder=value.newupdatedorderdata;
     return this.context.getState([address], this.timeout).then((stateEntries)=> {
@@ -38,9 +44,14 @@ updateorder(value){
       console.error("Error while updating order", error)
         })
 });
+  }
+  catch(err){
+    console.error("Error while updating order", error);
+  }
 }
 
 acceptorder(value){
+  try{
   const address = value.orderid;
   var accepteduserid=value.buyeruserid;
   var acceptestimestamp=value.buyeracctimestamp;
@@ -59,10 +70,15 @@ acceptorder(value){
       console.error("Error While Accepting Order", error)
         })
 });
+  }
+  catch(err){
+    console.error("Error while Accepting  order", error);
+  }
 }
 
 
 cancelorder(value){
+  try{
   const address = value.orderid;
     return this.context.getState([address], this.timeout).then((stateEntries)=> {
     var stateEntriesSend={}
@@ -76,10 +92,16 @@ cancelorder(value){
       console.error("Error While Cancelling Order", error)
         })
 });
+  }
+  catch(err){
+    console.error("Error while Cancelling  order", error);
+  }
 }
 
 
+
 starttrade(value){
+  try{
   const address = value.orderid;
   var tradestarttimestamp=value.trade_s_timestamp;
     return this.context.getState([address], this.timeout).then(async (stateEntries)=> {
@@ -99,9 +121,14 @@ starttrade(value){
       console.error("Error while setting up trade started", error)
         })
 });
+  }
+  catch(err){
+    console.error("Error while setting up trade started", error);
+  }
 }
 
  endtrade(value){
+   try{
   const address = value.orderid;
   var tradeendtimestamp=value.trade_e_timestamp;
   //var procmeterreadinge=value.PROC_METER_READING_E
@@ -121,9 +148,14 @@ starttrade(value){
       console.error("Error while setting up trade ending", error)
         })
 });
+   }
+   catch(err){
+    console.error("Error while setting up trade ending", error)
+   }
 }
 
 validatetrade(value){
+  try{
     const address = value.orderid;
     return this.context.getState([address], this.timeout).then((stateEntries)=> {
     var stateEntriesSend={}
@@ -135,7 +167,7 @@ validatetrade(value){
     var s_end_reading=orderjdata.Seller_METER_READING_E;
     var p_consumed=b_end_reading-b_start_reading;
     var p_produced=s_end_reading-s_start_reading;
-    var units=orderjdata.units;
+    var units=orderjdata.AMOUNT_OF_POWER;
     var B_Fine=0;
     var S_Fine=0;
     if (p_produced>units){
@@ -154,10 +186,15 @@ validatetrade(value){
       console.error("Error While Validating Order", error)
         })
 });
+  }
+  catch(err){
+    console.error("Error While Validating Order", error);
+  }
 }
 
 createuser(value){
-  var  address=makeAddress(value.UserID);
+  try{
+  var  address=value.UserID;
 var stateEntriesSend = {}
   stateEntriesSend[address] = Buffer.from(JSON.stringify(value));
 return  this.context.setState(stateEntriesSend, this.timeout).then((result)=> {     
@@ -165,12 +202,17 @@ console.log("User Created", result)
 }).catch(function(error) {
      console.error("Error While Creating User", error)
    })
+  }
+  catch(err){
+    console.error("Error While Creating User", error);
+  }
  }
 
 
  async getreadings(userid,deviceid,timestamp){
    var readings="";
 
+   try{
   this.context.getState([userid], this.timeout).then((stateEntries)=> {
     var userdata=stateEntries[userid].toString();
     var userjdata=JSON.parse(userdata)
@@ -186,7 +228,7 @@ console.log("User Created", result)
   }
 
   axios.post(url+'/agent/fetchTransactionData', {
-    "meterid": meterid,
+    "meterId": meterid,
     "timestamp":timestamp
   })
   .then((response) => {
@@ -198,10 +240,15 @@ console.log("User Created", result)
 }).catch((error) => {
   readings= 0;
 });
-return readings;    
+return readings; 
+   }
+   catch(err){
+     console.log("Error While Fetching Readings")
+     return 0;
+     
+   }
  }
  
-
 }
 const makeAddress = (x) => TP_NAMESPACE+ _hash(x)
 module.exports = EnergyTradeState;
