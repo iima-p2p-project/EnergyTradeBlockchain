@@ -372,23 +372,14 @@ app.post('/endtrade', authenticateJWT, (req, res) => {
     var payload = JSON.parse(data);
     sendRequest(payload, req.body.userpbkey, req.body.userpvkey, function(err, result, transactionid) {
 
+
+
+
       var batch_id_data = JSON.parse(result.body);
       //console.log(batch_id_data);
       if (batch_id_data.link) {
-<<<<<<< HEAD
-      var pos = batch_id_data.link.search("id=");
-      var resp = batch_id_data.link.substring(pos + 3);
-      res.send({ "order_id": req.body.orderid, "Batch_id": resp, "TxnID": transactionid, "Status": "TRADE_ENDED" });
-    }
-    else {
-      res.send({ "Status": "ERROR", "ErrorMessage": batch_id_data.error });
-    }
-  });
-}
-else{
-  res.send({ "Status": "ERROR", "ErrorMessage": "Missing required Inputs" });
-}
-=======
+
+
         var pos = batch_id_data.link.search("id=");
         var resp = batch_id_data.link.substring(pos + 3);
         res.send({
@@ -404,13 +395,16 @@ else{
         });
       }
     });
+
+
   } else {
     res.send({
       "Status": "ERROR",
       "ErrorMessage": "Missing required Inputs"
     });
   }
->>>>>>> e5e2b53c6895880ad87987eef042bc7d2f150ed9
+
+
 });
 
 app.post('/validatetrade', authenticateJWT, (req, res) => {
@@ -448,127 +442,143 @@ app.post('/validatetrade', authenticateJWT, (req, res) => {
 });
 
 app.post('/createuser', (req, res) => {
-<<<<<<< HEAD
-  if(req.body.username  && req.body.HWInfo  && req.body.url && req.body.phonenumber){
-console.log("Called");
-  var user = {};
-  user = createUser();
-  var userdata = {};
-  var sysdate = Date.now()
-  var UserID = 'fe9d87' + crypto.createHash('sha512').update(req.body.phonenumber).digest('hex').toLowerCase().substring(0, 64);
-  axios.get('http://localhost:8008/state/'+UserID).then((response) => {
-    var userbase = response.data.data;
-    let buff = new Buffer(userbase, 'base64');
-    let userdata = buff.toString('ascii');
-    var userjdata = JSON.parse(userdata);
-    res.send({ "Status": "USER_ALEADY_EXIST", "USER_DATA": userjdata })
+      <<
+      <<
+      <<
+      <
+      HEAD
+      if (req.body.username && req.body.HWInfo && req.body.url && req.body.phonenumber) {
+        console.log("Called");
+        var user = {};
+        user = createUser();
+        var userdata = {};
+        var sysdate = Date.now()
+        var UserID = 'fe9d87' + crypto.createHash('sha512').update(req.body.phonenumber).digest('hex').toLowerCase().substring(0, 64);
+        axios.get('http://localhost:8008/state/' + UserID).then((response) => {
+            var userbase = response.data.data;
+            let buff = new Buffer(userbase, 'base64');
+            let userdata = buff.toString('ascii');
+            var userjdata = JSON.parse(userdata);
+            res.send({
+              "Status": "USER_ALEADY_EXIST",
+              "USER_DATA": userjdata
+            })
 
-  }).
-=======
-  if (req.body.username && req.body.HWInfo && req.body.url && req.body.phonenumber) {
-    var user = {};
-    user = createUser();
-    var userdata = {};
-    var sysdate = Date.now()
-    var UserID = 'fe9d87' + crypto.createHash('sha512').update(req.body.phonenumber).digest('hex').toLowerCase().substring(0, 64);
-    axios.get('http://localhost:8008/state/' + UserID).then((response) => {
-      var userbase = response.data.data;
-      let buff = new Buffer(userbase, 'base64');
-      let userdata = buff.toString('ascii');
-      var userjdata = JSON.parse(userdata);
-      res.send({
-        "Status": "USER_ALEADY_EXIST",
-        "USER_DATA": userjdata
-      })
+          }). ===
+          ===
+          =
+          if (req.body.username && req.body.HWInfo && req.body.url && req.body.phonenumber) {
+            var user = {};
+            user = createUser();
+            var userdata = {};
+            var sysdate = Date.now()
+            var UserID = 'fe9d87' + crypto.createHash('sha512').update(req.body.phonenumber).digest('hex').toLowerCase().substring(0, 64);
+            axios.get('http://localhost:8008/state/' + UserID).then((response) => {
+                var userbase = response.data.data;
+                let buff = new Buffer(userbase, 'base64');
+                let userdata = buff.toString('ascii');
+                var userjdata = JSON.parse(userdata);
+                res.send({
+                  "Status": "USER_ALEADY_EXIST",
+                  "USER_DATA": userjdata
+                })
 
-    }).
->>>>>>> e5e2b53c6895880ad87987eef042bc7d2f150ed9
-    catch((error) => {
+              }). >>>
+              >>>
+              >
+              e5e2b53c6895880ad87987eef042bc7d2f150ed9
+            catch ((error) => {
 
-      userdata["CREATED_TIMESTAMP"] = sysdate;
-      userdata["UserID"] = UserID;
-      userdata["username"] = req.body.username;
-      userdata["HWInfo"] = req.body.HWInfo;
-      userdata["url"] = req.body.url;
-      userdata["phonenumber"] = req.body.phonenumber;
-      var data = `{"action":"CREATE_USER","data":${JSON.stringify(userdata)}}`;
-      var payload = JSON.parse(data);
+              userdata["CREATED_TIMESTAMP"] = sysdate;
+              userdata["UserID"] = UserID;
+              userdata["username"] = req.body.username;
+              userdata["HWInfo"] = req.body.HWInfo;
+              userdata["url"] = req.body.url;
+              userdata["phonenumber"] = req.body.phonenumber;
+              var data = `{"action":"CREATE_USER","data":${JSON.stringify(userdata)}}`;
+              var payload = JSON.parse(data);
 
-      sendRequest(payload, user.publickey, user.privatekey, function(err, result, transactionid) {
+              sendRequest(payload, user.publickey, user.privatekey, function(err, result, transactionid) {
 
-        var batch_id_data = JSON.parse(result.body);
-        //  console.log(batch_id_data);
-        if (batch_id_data.link) {
-          var pos = batch_id_data.link.search("id=");
-          var resp = batch_id_data.link.substring(pos + 3);
+                var batch_id_data = JSON.parse(result.body);
+                //  console.log(batch_id_data);
+                if (batch_id_data.link) {
+                  var pos = batch_id_data.link.search("id=");
+                  var resp = batch_id_data.link.substring(pos + 3);
+                  res.send({
+                    "User_ID": UserID,
+                    "publickey": user.publickey,
+                    "privatekey": user.privatekey,
+                    "Batch_ID": resp,
+                    "TxnID": transactionid,
+                    "Status": "USER_CREATED"
+                  });
+                } else {
+                  res.send({
+                    "Status": "ERROR",
+                    "ErrorMessage": batch_id_data.error
+                  });
+                }
+              });
+            });
+          } else {
+            res.send({
+              "Status": "ERROR",
+              "ErrorMessage": "Missing required Inputs"
+            });
+          }
+      });
+
+
+    app.post('/agent/fetchTransactionData', (req, res) => {
+      if (req.body.orderid && req.body.userpbkey && req.body.userpvkey) {
+        var meterid = req.body.meterid;
+        var timestamp = req.body.timestamp;
+        var readings;
+
+        if (meterid == '3' && timestamp == "2019-10-28 07:00:00") {
+          readings = 100
           res.send({
-            "User_ID": UserID,
-            "publickey": user.publickey,
-            "privatekey": user.privatekey,
-            "Batch_ID": resp,
-            "TxnID": transactionid,
-            "Status": "USER_CREATED"
+            "readings": readings
           });
-        } else {
+        } else if (meterid == '1' && timestamp == "2019-10-28 07:00:00") {
+          readings = 200
           res.send({
-            "Status": "ERROR",
-            "ErrorMessage": batch_id_data.error
+            "readings": readings
+          });
+        } else if (meterid == '3' && timestamp == "2019-10-28 08:00:00") {
+          readings = 500
+          res.send({
+            "readings": readings
+          });
+        } else if (meterid == '1' && timestamp == "2019-10-28 08:00:00") {
+          readings = 600
+          res.send({
+            "readings": readings
           });
         }
-      });
+
+      } else {
+        res.send({
+          "readings": 0
+        });
+      }
     });
-  } else {
-    res.send({
-      "Status": "ERROR",
-      "ErrorMessage": "Missing required Inputs"
-    });
-  }
-});
+
+    var httpServer = http.createServer(app);
+    var httpsServer = https.createServer(credentials, app);
+
+    httpServer.listen(6380); <<
+    <<
+    <<
+    <
+    HEAD httpsServer.listen(6381);
 
 
-app.post('/agent/fetchTransactionData', (req, res) => {
-  if (req.body.orderid && req.body.userpbkey && req.body.userpvkey) {
-    var meterid = req.body.meterid;
-    var timestamp = req.body.timestamp;
-    var readings;
-
-    if (meterid == '3' && timestamp == "2019-10-28 07:00:00") {
-      readings = 100
-      res.send({
-        "readings": readings
-      });
-    } else if (meterid == '1' && timestamp == "2019-10-28 07:00:00") {
-      readings = 200
-      res.send({
-        "readings": readings
-      });
-    } else if (meterid == '3' && timestamp == "2019-10-28 08:00:00") {
-      readings = 500
-      res.send({
-        "readings": readings
-      });
-    } else if (meterid == '1' && timestamp == "2019-10-28 08:00:00") {
-      readings = 600
-      res.send({
-        "readings": readings
-      });
-    }
-
-  } else {
-    res.send({
-      "readings": 0
-    });
-  }
-});
-
-var httpServer = http.createServer(app);
-var httpsServer = https.createServer(credentials, app);
-
-httpServer.listen(6380);
-<<<<<<< HEAD
-httpsServer.listen(6381);
-
-
-=======
-httpsServer.listen(6381);
->>>>>>> e5e2b53c6895880ad87987eef042bc7d2f150ed9
+    ===
+    ===
+    =
+    httpsServer.listen(6381); >>>
+    >>>
+    >
+    e5e2b53c6895880ad87987eef042bc7d2f150ed9
