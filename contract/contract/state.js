@@ -108,8 +108,9 @@ starttrade(value){
     var stateEntriesSend={}
     var orderdata=stateEntries[address].toString();
     var orderjdata=JSON.parse(orderdata)
-    orderjdata.Seller_METER_READING_S= await getreadings(orderjdata.Seller_UserID,orderjdata.Seller_DeviceID,orderjdata.TIME_FROM);
-    orderjdata.Buyer_METER_READING_S=await getreadings(orderjdata.Buyer_UserID,orderjdata.Buyer_DeviceID,orderjdata.TIME_FROM);
+    orderjdata.Seller_METER_READING_S= await this.getreadings(orderjdata.Seller_UserID,orderjdata.Seller_DeviceID,orderjdata.TIME_FROM);
+    orderjdata.Buyer_METER_READING_S=await this.getreadings(orderjdata.Buyer_UserID,orderjdata.Buyer_DeviceID,orderjdata.TIME_FROM);
+console.log(orderjdata.Seller_METER_READING_S);
     //orderjdata.PROC_METER_READING_E=procmeterreadinge;
    // orderjdata.CONS_METER_READING_E=consmeterreadinge;
     orderjdata.TRADE_S_TIMESTAMP=tradestarttimestamp;
@@ -137,8 +138,8 @@ starttrade(value){
     var stateEntriesSend={}
     var orderdata=stateEntries[address].toString();
     var orderjdata=JSON.parse(orderdata)
-    orderjdata.Seller_METER_READING_E=await getreadings(orderjdata.Seller_UserID,orderjdata.Seller_DeviceID,orderjdata.TIME_TO);
-    orderjdata.Buyer_METER_READING_E=await getreadings(orderjdata.Buyer_UserID,orderjdata.Buyer_DeviceID,orderjdata.TIME_TO);
+    orderjdata.Seller_METER_READING_E=await this.getreadings(orderjdata.Seller_UserID,orderjdata.Seller_DeviceID,orderjdata.TIME_TO);
+    orderjdata.Buyer_METER_READING_E=await this.getreadings(orderjdata.Buyer_UserID,orderjdata.Buyer_DeviceID,orderjdata.TIME_TO);
     orderjdata.TRADE_E_TIMESTAMP=tradeendtimestamp;
     orderjdata.TRADE_STATUS='TRADING_COMPLETED';
     stateEntriesSend[address]= Buffer.from(JSON.stringify(orderjdata));
@@ -211,9 +212,8 @@ console.log("User Created", result)
 
  async getreadings(userid,deviceid,timestamp){
    var readings="";
-
    try{
-  this.context.getState([userid], this.timeout).then((stateEntries)=> {
+  return this.context.getState([userid], this.timeout).then(async (stateEntries)=> {
     var userdata=stateEntries[userid].toString();
     var userjdata=JSON.parse(userdata)
     var hwarr=userjdata.HWInfo;
@@ -227,20 +227,21 @@ console.log("User Created", result)
       }
   }
 
-  axios.post(url+'/agent/fetchTransactionData', {
+console.log(meterid);
+console.log(timestamp);
+console.log(url);
+var response = await  axios.post(url+'/agent/fetchTransactionData', {
     "meterId": meterid,
     "timestamp":timestamp
-  })
-  .then((response) => {
-    readings=response.data.readings;
-  }).catch((error) => {
-    readings= 0;
   });
+console.log(response.data);
+    readings=response.data.meterData[0].meterReading;
+    return readings;
   
 }).catch((error) => {
   readings= 0;
 });
-return readings; 
+ 
    }
    catch(err){
      console.log("Error While Fetching Readings")

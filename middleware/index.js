@@ -307,7 +307,7 @@ app.post('/endtrade',authenticateJWT, (req, res) => {
       if (batch_id_data.link) {
       var pos = batch_id_data.link.search("id=");
       var resp = batch_id_data.link.substring(pos + 3);
-      res.send({ "order_id": req.body.orderid, "Batch_id": resp, "TxnID": transactionid, "Status": "TRADE_STARTED" });
+      res.send({ "order_id": req.body.orderid, "Batch_id": resp, "TxnID": transactionid, "Status": "TRADE_ENDED" });
     }
     else {
       res.send({ "Status": "ERROR", "ErrorMessage": batch_id_data.error });
@@ -345,6 +345,7 @@ app.post('/validatetrade',authenticateJWT, (req, res) => {
 
 app.post('/createuser', (req, res) => {
   if(req.body.username  && req.body.HWInfo  && req.body.url && req.body.phonenumber){
+console.log("Called");
   var user = {};
   user = createUser();
   var userdata = {};
@@ -424,4 +425,5 @@ var httpsServer = https.createServer(credentials, app);
 
 httpServer.listen(6380);
 httpsServer.listen(6381);
+
 
