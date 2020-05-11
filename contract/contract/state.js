@@ -174,11 +174,32 @@ class EnergyTradeState {
         var units = orderjdata.AMOUNT_OF_POWER;
         var B_Fine = 0;
         var S_Fine = 0;
-        if (p_produced > units) {
-          B_Fine = p_produced - units;
-        } else if (p_consumed < units) {
-          S_Fine = units - p_consumed;
+        var p_consumed = b_end_reading - b_start_reading;
+        console.log('p_consumed: ' + p_consumed);
+        var p_produced = s_start_reading - s_end_reading;
+        console.log('p_produced: ' + p_produced);
+        var units = orderjdata.AMOUNT_OF_POWER;
+        var B_Fine = 0;
+        var S_Fine = 0;
+        if (p_produced < units) {
+          // shortfall = unit - p_produced
+          S_Fine = (unit - p_produced) * (orderjdata.PRICE + 2.5);
+          console.log('shortfall S_Fine' + S_Fine);
+        } else if (p_produced > units) {
+          //  oversupply = p_produced - units
+          S_Fine = (p_produced - units) * (2.5);
+          console.log('oversupply S_Fine' + S_Fine);
+
+        } else if (p_consumed > units) {
+          //  overConsumption = p_consumed - units
+          B_Fine = (p_consumed - units) * 2.5;
+          console.log('overConsumption B_Fine' + B_Fine);
         }
+        //  else if (p_consumed < units) {
+        //   // underConsumption = units - p_consumed
+        //   B_Fine = 0
+        //   console.log('underConsumption B_Fine' + B_Fine);
+        // }
         orderjdata.ORDER_STATUS = 'VALIDATED';
         orderjdata.B_FINE = B_Fine;
         orderjdata.S_FINE = S_Fine;
