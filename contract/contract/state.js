@@ -169,44 +169,53 @@ class EnergyTradeState {
         var s_start_reading = orderjdata.Seller_METER_READING_S;
         var b_end_reading = orderjdata.Buyer_METER_READING_E;
         var s_end_reading = orderjdata.Seller_METER_READING_E;
+        console.log("b_end_reading" + b_end_reading);
+        console.log('b_start_reading' + b_start_reading);
+        console.log('s_end_reading' + s_end_reading);
+        console.log('s_start_reading' + s_start_reading);
         var p_consumed = b_end_reading - b_start_reading;
         var p_produced = s_end_reading - s_start_reading;
         var units = orderjdata.AMOUNT_OF_POWER;
+        console.log('units' + units);
 
         var B_Fine = 0;
         var S_Fine = 0;
-
         var p_consumed = b_end_reading - b_start_reading;
         console.log('p_consumed: ' + p_consumed);
-        var p_produced = s_start_reading - s_end_reading;
+        var p_produced = s_end_reading - s_start_reading;
         console.log('p_produced: ' + p_produced);
-        var units = orderjdata.AMOUNT_OF_POWER;
-        var B_Fine = 0;
-        var S_Fine = 0;
-        try {
-          if (p_produced < units) {
-            // shortfall = unit - p_produced
-            S_Fine = (unit - p_produced) * (orderjdata.PRICE + 2.5);
-            console.log('shortfall S_Fine' + S_Fine);
-          } else if (p_produced > units) {
-            //  oversupply = p_produced - units
-            S_Fine = (p_produced - units) * (2.5);
-            console.log('oversupply S_Fine' + S_Fine);
+        if (!(isNaN(p_consumed)) && !(isNaN(p_produced))) {
 
-          } else if (p_consumed > units) {
-            //  overConsumption = p_consumed - units
-            B_Fine = (p_consumed - units) * 2.5;
-            console.log('overConsumption B_Fine' + B_Fine);
-          }
-          //  else if (p_consumed < units) {
-          //   // underConsumption = units - p_consumed
-          //   B_Fine = 0
-          //   console.log('underConsumption B_Fine' + B_Fine);
-          // }
 
-        } catch (e) {
-          console.log(e);
-        };
+          var units = orderjdata.AMOUNT_OF_POWER;
+
+          try {
+            if (p_produced < units) {
+              // shortfall = unit - p_produced
+              S_Fine = (unit - p_produced) * (orderjdata.PRICE + 2.5);
+              console.log('shortfall S_Fine' + S_Fine);
+            } else if (p_produced > units) {
+              //  oversupply = p_produced - units
+              S_Fine = (p_produced - units) * (2.5);
+              console.log('oversupply S_Fine' + S_Fine);
+
+            } else if (p_consumed > units) {
+              //  overConsumption = p_consumed - units
+              B_Fine = (p_consumed - units) * 2.5;
+              console.log('overConsumption B_Fine' + B_Fine);
+            }
+
+          } catch (e) {
+            console.log(e);
+          };
+
+
+        } else {
+          console.log('Redings are of unsupported formate');
+          B_Fine = 9999;
+          S_Fine = 9999;
+
+        }
 
         orderjdata.ORDER_STATUS = 'VALIDATED';
         orderjdata.B_FINE = B_Fine;
@@ -268,6 +277,7 @@ class EnergyTradeState {
         return readings;
 
       }).catch((error) => {
+        console.log('Error While Fetching Readings ' + error);
         readings = 0;
       });
 

@@ -7,7 +7,7 @@ https://www.getpostman.com/collections/c1079d0c417a562046c0
     2. Install forever using npm install -g forever
     3. Pull the repo
     4. Run  sudo docker-compose -f  network.yaml up -d
-    5.cd contract/contract/
+    5. cd contract/contract/
     6. npm install
     5. Go to Repo/contract/  and run  forever start  index.js  tcp://localhost:4004
     6. Go to Repo/contract/  and run  forever start  index.js  tcp://localhost:4005
