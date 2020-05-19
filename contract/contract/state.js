@@ -192,7 +192,7 @@ class EnergyTradeState {
           try {
             if (p_produced < units) {
               // shortfall = unit - p_produced
-              S_Fine = (unit - p_produced) * (orderjdata.PRICE + 2.5);
+              S_Fine = (units - p_produced) * (orderjdata.PRICE + 2.5);
               console.log('shortfall S_Fine' + S_Fine);
             } else if (p_produced > units) {
               //  oversupply = p_produced - units
