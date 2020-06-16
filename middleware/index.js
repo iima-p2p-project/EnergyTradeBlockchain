@@ -131,6 +131,65 @@ app.post('/createorder', authenticateJWT, (req, res) => {
 });
 
 
+app.post('/createorder_dr', authenticateJWT, (req, res) => {
+
+  if (req.body.userid && req.body.seller_deviceid && req.body.energy && req.body.time_from &&
+    req.body.time_to && req.body.location && req.body.amount_of_power && req.body.price && req.body.userpbkey && req.body.userpvkey) {
+    var orderdata = {};
+    var sysdate = Date.now()
+    orderdata["CREATED_TIMESTAMP"] = sysdate;
+    orderdata["Seller_UserID"] = req.body.userid;
+    orderdata["Buyer_UserID"] = "";
+    orderdata["Seller_DeviceID"] = req.body.seller_deviceid;
+    orderdata["Buyer_DeviceID"] = "";
+    orderdata["Accepted_TIMESTAMP"] = "";
+    orderdata["ORDER_STATUS"] = "CREATED";
+    orderdata["ENERGY"] = req.body.energy;
+    orderdata["TIME_FROM"] = req.body.time_from;
+    orderdata["TIME_TO"] = req.body.time_to;
+    orderdata["LOCATION"] = req.body.location;
+    orderdata["AMOUNT_OF_POWER"] = req.body.amount_of_power;
+    orderdata["PRICE"] = req.body.price;
+    orderdata["TRADE_S_TIMESTAMP"] = "";
+    orderdata["TRADE_C_TIMESTAMP"] = "";
+    orderdata["TRADE_STATUS"] = "Not Intiated"
+    orderdata["Seller_METER_READING_S"] = 0;
+    orderdata["Seller_METER_READING_E"] = 0;
+    orderdata["Buyer_METER_READING_S"] = 0;
+    orderdata["Buyer_METER_READING_E"] = 0;
+    orderdata["B_FINE"] = 0;
+    orderdata["S_FINE"] = 0;
+    var data = `{"action":"CREATE_ORDER","data":${JSON.stringify(orderdata)}}`;
+    var payload = JSON.parse(data);
+    var orderid = 'fe9d87' + crypto.createHash('sha512').update(req.body.userid + sysdate).digest('hex').toLowerCase().substring(0, 64);
+    sendRequest(payload, req.body.userpbkey, req.body.userpvkey, function(err, result, transactionid) {
+      var batch_id_data = JSON.parse(result.body);
+      if (batch_id_data.link) {
+        //console.log(batch_id_data);
+        var pos = batch_id_data.link.search("id=");
+        var resp = batch_id_data.link.substring(pos + 3);
+        res.send({
+          "order_id": orderid,
+          "Batch_id": resp,
+          "TxnID": transactionid,
+          "status": "ORDER_CREATED"
+        });
+      } else {
+        res.send({
+          "Status": "ERROR",
+          "ErrorMessage": batch_id_data.error
+        });
+      }
+    });
+  } else {
+    res.send({
+      "Status": "ERROR",
+      "ErrorMessage": "Missing the required Inputs"
+    });
+  }
+});
+
+
 app.post('/acceptorder', authenticateJWT, (req, res) => {
 
   if (req.body.buyeruserid && req.body.buyerdeviceid && req.body.orderid && req.body.userpbkey && req.body.userpvkey) {
@@ -168,6 +227,49 @@ app.post('/acceptorder', authenticateJWT, (req, res) => {
     });
   }
 });
+
+
+
+app.post('/acceptorder_dr', authenticateJWT, (req, res) => {
+
+  if (req.body.buyeruserid && req.body.buyerdeviceid && req.body.orderid && req.body.userpbkey && req.body.userpvkey) {
+    var orderdata = {};
+    var sysdate = Date.now()
+    orderdata["buyeruserid"] = req.body.buyeruserid;
+    orderdata["buyeracctimestamp"] = sysdate;
+    orderdata["buyer_deviceid"] = req.body.buyerdeviceid;
+    orderdata["orderid"] = req.body.orderid;
+    var data = `{"action":"ACCEPT_ORDER","data":${JSON.stringify(orderdata)}}`;
+    var payload = JSON.parse(data);
+    sendRequest(payload, req.body.userpbkey, req.body.userpvkey, function(err, result, transactionid) {
+
+      var batch_id_data = JSON.parse(result.body);
+      if (batch_id_data.link) {
+        // console.log(batch_id_data);
+        var pos = batch_id_data.link.search("id=");
+        var resp = batch_id_data.link.substring(pos + 3);
+        res.send({
+          "Batch_id": resp,
+          "TxnID": transactionid,
+          "status": "ORDER_ACCEPTED"
+        });
+      } else {
+        res.send({
+          "Status": "ERROR",
+          "ErrorMessage": batch_id_data.error
+        });
+      }
+    });
+  } else {
+    res.send({
+      "Status": "ERROR",
+      "ErrorMessage": "Missing Required Inputs"
+    });
+  }
+});
+
+
+
 app.post('/updateorder', authenticateJWT, (req, res) => {
   if (req.body.userid && req.body.seller_deviceid && req.body.energy && req.body.time_from &&
     req.body.time_to && req.body.location && req.body.amount_of_power && req.body.price && req.body.userpbkey && req.body.userpvkey && req.body.orderid) {

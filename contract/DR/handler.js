@@ -12,32 +12,32 @@ class EnergyTradeHandler extends TransactionHandler {
  apply(transactionProcessRequest, context) {
    let payload = cbor.decode(transactionProcessRequest.payload);
    let energytradestate = new EnergyTradeState(context);
-   if (payload.action === 'CREATE_ORDER') {
-     return energytradestate.createorder(payload.data)
-} else  if (payload.action === 'UPDATE_ORDER') {
-     return energytradestate.updateorder(payload.data)
+   if (payload.action === 'CREATE_ORDER_DR') {
+     return energytradestate.createorder_dr(payload.data)
+} else  if (payload.action === 'UPDATE_ORDER_DR') {
+     return energytradestate.updateorder_dr(payload.data)
 }
-else  if (payload.action === 'CANCEL_ORDER') {
-  return energytradestate.cancelorder(payload.data)
+else  if (payload.action === 'CANCEL_ORDER_DR') {
+  return energytradestate.cancelorder_dr(payload.data)
 }
-else  if (payload.action === 'ACCEPT_ORDER') {
-  return energytradestate.acceptorder(payload.data)
+else  if (payload.action === 'ACCEPT_ORDER_DR') {
+  return energytradestate.acceptorder_dr(payload.data)
 }
-else  if (payload.action === 'START_TRADE') {
-  return energytradestate.starttrade(payload.data)
+else  if (payload.action === 'START_TRADE_DR') {
+  return energytradestate.starttrade_dr(payload.data)
 }
-else  if (payload.action === 'END_TRADE') {
-  return energytradestate.endtrade(payload.data)
+else  if (payload.action === 'END_TRADE_DR') {
+  return energytradestate.endtrade_dr(payload.data)
 }
-else  if (payload.action === 'VALIDATE_TRADE') {
-  return energytradestate.validatetrade(payload.data)
+else  if (payload.action === 'VALIDATE_TRADE_DR') {
+  return energytradestate.validatetrade_dr(payload.data)
 }
-else  if (payload.action === 'CREATE_USER') {
-  return energytradestate.createuser(payload.data)
+else  if (payload.action === 'CREATE_USER_DR') {
+  return energytradestate.createuser_dr(payload.data)
 }
 else {
      throw  new InvalidTransaction(
-       `Action must be CREATE_ORDER,UPDATE_ORDER,ACCEPT_ORDER,START_TRADE,END_TRADE not ${payload.action}`
+       `Action must be CREATE_ORDER_DR,UPDATE_ORDER_DR,ACCEPT_ORDER_DR,START_TRADE_DR,END_TRADE_DR not ${payload.action}`
      )
    }
  }

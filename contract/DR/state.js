@@ -15,7 +15,7 @@ class EnergyTradeState {
   }
 
 
-  createorder(value) {
+  createorder_dr(value) {
     try {
       var address = makeAddress(value.Seller_UserID + value.CREATED_TIMESTAMP);
       var stateEntriesSend = {}
@@ -36,7 +36,7 @@ class EnergyTradeState {
     }
   }
 
-  updateorder(value) {
+  updateorder_dr(value) {
     try {
       const address = value.orderid;
       var updatedorder = value.newupdatedorderdata;
@@ -54,7 +54,7 @@ class EnergyTradeState {
     }
   }
 
-  acceptorder(value) {
+  acceptorder_dr(value) {
     try {
       const address = value.orderid;
       var accepteduserid = value.buyeruserid;
@@ -80,7 +80,7 @@ class EnergyTradeState {
   }
 
 
-  cancelorder(value) {
+  cancelorder_dr(value) {
     try {
       const address = value.orderid;
       return this.context.getState([address], this.timeout).then((stateEntries) => {
@@ -102,7 +102,7 @@ class EnergyTradeState {
 
 
 
-  starttrade(value) {
+  starttrade_dr(value) {
     try {
       const address = value.orderid;
       var tradestarttimestamp = value.trade_s_timestamp;
@@ -130,7 +130,7 @@ class EnergyTradeState {
     }
   }
 
-  endtrade(value) {
+  endtrade_dr(value) {
     try {
       const address = value.orderid;
       var tradeendtimestamp = value.trade_e_timestamp;
@@ -158,7 +158,7 @@ class EnergyTradeState {
     }
   }
 
-  validatetrade(value) {
+  validatetrade_dr(value) {
     try {
       const address = value.orderid;
       return this.context.getState([address], this.timeout).then((stateEntries) => {
@@ -194,7 +194,7 @@ class EnergyTradeState {
     }
   }
 
-  createuser(value) {
+  createuser_dr(value) {
     try {
       var address = value.UserID;
       var stateEntriesSend = {}
@@ -210,7 +210,7 @@ class EnergyTradeState {
   }
 
 
-  async getreadings(userid, deviceid, timestamp) {
+  async getreadings_dr(userid, deviceid, timestamp) {
     var readings = "";
     try {
       return this.context.getState([userid], this.timeout).then(async (stateEntries) => {
