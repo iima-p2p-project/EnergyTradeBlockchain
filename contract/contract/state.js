@@ -18,6 +18,7 @@ class EnergyTradeState {
   createorder(value) {
     try {
       var address = makeAddress(value.Seller_UserID + value.CREATED_TIMESTAMP);
+      console.log("Address",address)
       var stateEntriesSend = {}
       stateEntriesSend[address] = Buffer.from(JSON.stringify(value));
       return this.context.setState(stateEntriesSend, this.timeout).then((result) => {
