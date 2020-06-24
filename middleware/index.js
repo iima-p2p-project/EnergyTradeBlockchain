@@ -75,8 +75,7 @@ app.post('/login', (req, res) => {
 app.post('/createorder', authenticateJWT, (req, res) => {
 
   if (req.body.eventStatus && req.body.buyeruserid && req.body.buyer_device  && req.body.startTS &&
-    req.body.endTS  && req.body.plannedQuantity  && req.body.userpbkey && req.body.userpvkey
-    && req.body.buyerNetMeterReading_s && req.body.buyerNetMeterReading_e && req.body.buyerFine && req.body.sellers) {
+    req.body.endTS  && req.body.plannedQuantity  && req.body.userpbkey && req.body.userpvkey && req.body.sellers) {
   var sellernames = ""
   var sellersArray = req.body.sellers;
       if((req.body.sellers).length > 0 ){
@@ -85,8 +84,8 @@ app.post('/createorder', authenticateJWT, (req, res) => {
             console.log("Sellername", sellernames)
         }
       }
-  
-    
+
+
     var orderdata = {};
     var sysdate = Date.now()
     orderdata["CREATED_TIMESTAMP"] = sysdate;
@@ -101,9 +100,9 @@ app.post('/createorder', authenticateJWT, (req, res) => {
     orderdata["SELLERS"] = req.body.sellers;
     orderdata["PLANNED_QUANTITY"] = req.body.plannedQuantity;
     orderdata["TRADE_STATUS"] = "Not Intiated"
-    orderdata["Buyer_METER_READING_S"] = req.body.buyerNetMeterReading_s;
-    orderdata["Buyer_METER_READING_E"] = req.body.buyerNetMeterReading_e;
-    orderdata["B_FINE"] = req.body.buyerFine;
+    orderdata["Buyer_METER_READING_S"] = 0;
+    orderdata["Buyer_METER_READING_E"] = 0;
+    orderdata["B_FINE"] = 0;
     var data = `{"action":"CREATE_ORDER","data":${JSON.stringify(orderdata)}}`;
     var payload = JSON.parse(data);
     var orderid = 'fe9d87' + crypto.createHash('sha512').update(req.body.buyeruserid + sysdate).digest('hex').toLowerCase().substring(0, 64);
@@ -279,6 +278,7 @@ app.post('/getOrder', authenticateJWT, (req, res) => {
 
     }).
     catch((error) => {
+      console.log(error);
       res.send({
         "Status": "ORDER_NOTEXISTS",
         "ErrorMessage": error
