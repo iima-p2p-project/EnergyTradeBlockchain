@@ -2,6 +2,7 @@ var express = require('express');
 var http = require('http');
 var https = require('https');
 var fs = require('fs');
+var unirest = require('unirest');
 var bodyParser = require('body-parser');
 const app = express();
 app.use(bodyParser.json());
@@ -138,6 +139,7 @@ app.post('/acceptorder', (req, res) => {
 
   if (req.body.buyeruserid && req.body.buyerdeviceid && req.body.orderid && req.body.userpbkey && req.body.userpvkey) {
     var orderdata = {};
+    var sellerDataArray = [];
     var sysdate = Date.now()
     orderdata["buyeruserid"] = req.body.buyeruserid;
     orderdata["buyeracctimestamp"] = sysdate;
@@ -147,6 +149,25 @@ app.post('/acceptorder', (req, res) => {
     var payload = JSON.parse(data);
     sendRequest(payload, req.body.userpbkey, req.body.userpvkey, function(err, result, transactionid) {
 
+var apireq = unirest('GET', 'http://localhost:8008/state/'+ req.body.order_id)
+  .end(function (result) { 
+    if (!result.error){
+      console.log(result.raw_body);
+      sellerDataArray = result.raw_body.sellers;
+    } else{
+      console.log(result.error);
+    }
+    sellerDataArrayLength = sellerDataArray.length;
+    if (sellerDataArrayLength > 0){
+      // Logic of replacing status
+    }
+
+  });
+
+      
+      
+      
+      
       var batch_id_data = JSON.parse(result.body);
       if (batch_id_data.link) {
         // console.log(batch_id_data);
@@ -302,14 +323,16 @@ app.post('/getUser', authenticateJWT, (req, res) => {
       var userjdata = JSON.parse(userdata);
       res.send({
         "Status": "USER_EXIST",
-        "USER_DATA": userjdata
+        "USER_DATA": userjdata,
+        "Userbase":userbase
       })
 
     }).
     catch((error) => {
       res.send({
         "Status": "USER_NOT_EXISTS",
-        "ErrorMessage": error
+        "ErrorMessage": error,
+        "Userbase":userbase
       })
     });
   } else {
