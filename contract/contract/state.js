@@ -10,13 +10,13 @@ class EnergyTradeState {
    this.stateEntries = {};
  }
 
- 
+
 createorder(value) {
   try{
 var  address=makeAddress(value.buyerUserId+value.createdTS);
 var stateEntriesSend = {}
   stateEntriesSend[address] = Buffer.from(JSON.stringify(value));
-return  this.context.setState(stateEntriesSend, this.timeout).then((result)=> {     
+return  this.context.setState(stateEntriesSend, this.timeout).then((result)=> {
 console.log("Order Created", result)
 }).catch(function(error) {
      console.error("Error While Creating Order", error)
@@ -36,9 +36,9 @@ starttrade(value){
     var orderdata=stateEntries[address].toString();
     var orderjdata=JSON.parse(orderdata)
     orderjdata.buyerNetMeterReading_s= await this.getreadings(orderjdata.buyerUserId,orderjdata.buyerDevice,orderjdata.startTS);
-    
+    orderjdata.eventStatus = "TRADE_STARTED";
     var sellers=orderjdata.sellers;
-    for (i=0;i<sellers.length;i++){
+    for (var i=0;i<sellers.length;i++){
      var seller= orderjdata.sellers[i];
      var netdata=await this.getreadings(seller.sellerId,"NET",orderjdata.startTS);
      seller.sellerMeterReadingsStart={"NET":netdata};
@@ -64,8 +64,10 @@ starttrade(value){
     var orderdata=stateEntries[address].toString();
     var orderjdata=JSON.parse(orderdata)
     orderjdata.buyerNetMeterReading_e=await this.getreadings(orderjdata.buyerUserId,orderjdata.buyerDevice,orderjdata.endTS);
+    orderjdata.eventStatus = "TRADE_ENDED";
     console.log("Calculating Seller's END Readings");
-    for (i=0;i<sellers.length;i++){
+    var sellers=orderjdata.sellers;
+    for (var i=0;i<sellers.length;i++){
       var seller= orderjdata.sellers[i];
       var netdata=await this.getreadings(seller.sellerId,"NET",orderjdata.endTS);
       seller.sellMeterReadingsEnd={"NET":netdata};
@@ -90,24 +92,75 @@ validatetrade(value){
     var stateEntriesSend={}
     var orderdata=stateEntries[address].toString();
     var orderjdata=JSON.parse(orderdata)
-    var b_start_reading=orderjdata.Buyer_METER_READING_S;
-    var s_start_reading=orderjdata.Seller_METER_READING_S;
-    var b_end_reading=orderjdata.Buyer_METER_READING_E;
-    var s_end_reading=orderjdata.Seller_METER_READING_E;
+    var b_start_reading=orderjdata.buyerNetMeterReading_s;
+    var b_end_reading=orderjdata.buyerNetMeterReading_e;
     var p_consumed=b_end_reading-b_start_reading;
-    var p_produced=s_end_reading-s_start_reading;
-    var units=orderjdata.AMOUNT_OF_POWER;
-    var B_Fine=0;
-    var S_Fine=0;
-    if (p_produced>units){
-        B_Fine=p_produced-units;
+    var units=orderjdata.plannedQuantity;
+
+    var B_Fine = 0;
+
+    var p_consumed = b_end_reading - b_start_reading;
+    console.log('p_consumed: ' + p_consumed);
+    var p_produced = s_end_reading - s_start_reading;
+    console.log('p_produced: ' + p_produced);
+
+
+
+    var sellers=orderjdata.sellers;
+    for ( var i=0;i<sellers.length;i++){
+      var seller= orderjdata.sellers[i];
+      console.log("Seller reading" + seller.sellerMeterReadingsStart[0]);
+      var p_produced = seller.sellerMeterReadingsStart[0] - seller.sellMeterReadingsEnd[0];
+      var units = seller.committedPower;
+      var S_Fine = 0;
+
+
+if (!(isNaN(p_consumed)) && !(isNaN(p_produced))) {
+
+      try {
+        if (p_produced < units) {
+          // shortfall = unit - p_produced
+          S_Fine = (units - p_produced) * (orderjdata.price + 2.5);
+          console.log('shortfall S_Fine' + S_Fine);
+        } else if (p_produced > units) {
+          //  oversupply = p_produced - units
+          S_Fine = (p_produced - units) * (2.5);
+          console.log('oversupply S_Fine' + S_Fine);
+
+        }
+
+        // else if (p_consumed > units) {
+        //   //  overConsumption = p_consumed - units
+        //   B_Fine = (p_consumed - units) * 2.5;
+        //   console.log('overConsumption B_Fine' + B_Fine);
+        // }
+
+      } catch (e) {
+        console.log(e);
+      };
+
+    } else {
+      console.log('Redings are of unsupported formate');
+      B_Fine = 9999;
+      S_Fine = 9999;
+
     }
-    else if (p_consumed<units){
-      S_Fine=units-p_consumed;
+
+    seller.sellerFine = S_Fine;
+
+
+
+    } //forloop
+
+    if (p_consumed > units) {
+      //  overConsumption = p_consumed - units
+      B_Fine = (p_consumed - units) * 2.5;
+      console.log('overConsumption B_Fine' + B_Fine);
     }
-    orderjdata.ORDER_STATUS='VALIDATED';
-    orderjdata.B_FINE=B_Fine;
-    orderjdata.S_FINE=S_Fine;
+
+
+    orderjdata.eventStatus='VALIDATED';
+    orderjdata.buyerFine=B_Fine;
     stateEntriesSend[address]= Buffer.from(JSON.stringify(orderjdata));
     return  this.context.setState(stateEntriesSend, this.timeout).then(function(result) {
       console.log("Order Validated", result)
@@ -126,7 +179,7 @@ createuser(value){
   var  address=value.UserID;
 var stateEntriesSend = {}
   stateEntriesSend[address] = Buffer.from(JSON.stringify(value));
-return  this.context.setState(stateEntriesSend, this.timeout).then((result)=> {     
+return  this.context.setState(stateEntriesSend, this.timeout).then((result)=> {
 console.log("User Created", result)
 }).catch(function(error) {
      console.error("Error While Creating User", error)
@@ -165,19 +218,19 @@ var response = await  axios.post(url+'/agent/fetchTransactionData', {
 console.log(response.data);
     readings=response.data.meterData[0].meterReading;
     return readings;
-  
+
 }).catch((error) => {
   readings= 0;
 });
- 
+
    }
    catch(err){
      console.log("Error While Fetching Readings")
      return 0;
-     
+
    }
  }
- 
+
 }
 const makeAddress = (x) => TP_NAMESPACE+ _hash(x)
 module.exports = EnergyTradeState;

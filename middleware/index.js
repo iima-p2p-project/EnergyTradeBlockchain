@@ -43,7 +43,7 @@
       let buff = new Buffer(userbase, 'base64');
       let userdata = buff.toString('ascii');
       var userjdata = JSON.parse(userdata);
-      if(userjdata){  
+      if(userjdata){
         const accessToken = jwt.sign({ userid:userid }, accessTokenSecret);
         res.json({
           accessToken
@@ -65,11 +65,12 @@
       var orderdata = {};
     var sysdate = Date.now()
     if (req.body.createdTS  && req.body.startTS   && req.body.plannedQuantity  && req.body.buyerUserId &&
-      req.body.buyerDevice  && req.body.sellers   &&  req.body.userpbkey  && req.body.userpvkey )
+      req.body.buyerDevice  && req.body.sellers   &&  req.body.userpbkey  && req.body.userpvkey && req.body.price)
       {
     orderdata["createdTS"] = req.body.createdTS;
     orderdata["startTS"] =  req.body.startTS;
     orderdata["endTS"] =  req.body.endTS;
+    orderdata["price"] =  req.body.price;
     orderdata["plannedQuantity"] = req.body.plannedQuantity;
     orderdata["buyerUserId"] = req.body.buyerUserId;
     orderdata["buyerDevice"] = req.body.buyerDevice;
@@ -97,7 +98,7 @@
     else{
       res.send({ "Status": "ERROR", "ErrorMessage": "Missing Required Inputs"});
     }
- 
+
 });
 
 
@@ -148,7 +149,7 @@
     var data = `{"action":"START_TRADE","data":${JSON.stringify(orderdata)}}`;
     var payload = JSON.parse(data);
     sendRequest(payload, req.body.userpbkey, req.body.userpvkey, function (err, result, transactionid) {
-  
+
         var batch_id_data = JSON.parse(result.body);
         //console.log(batch_id_data);
         if (batch_id_data.link) {
@@ -176,13 +177,13 @@
     var data = `{"action":"END_TRADE","data":${JSON.stringify(orderdata)}}`;
     var payload = JSON.parse(data);
     sendRequest(payload, req.body.userpbkey, req.body.userpvkey, function (err, result, transactionid) {
-      
+
         var batch_id_data = JSON.parse(result.body);
         //console.log(batch_id_data);
         if (batch_id_data.link) {
         var pos = batch_id_data.link.search("id=");
         var resp = batch_id_data.link.substring(pos + 3);
-        res.send({ "order_id": req.body.orderid, "Batch_id": resp, "TxnID": transactionid, "Status": "TRADE_STARTED" });
+        res.send({ "order_id": req.body.orderid, "Batch_id": resp, "TxnID": transactionid, "Status": "TRADE_ENDED" });
       }
       else {
         res.send({ "Status": "ERROR", "ErrorMessage": batch_id_data.error });
@@ -234,7 +235,7 @@
 
     }).
       catch((error) => {
-        
+
     userdata["CREATED_TIMESTAMP"] = sysdate;
     userdata["UserID"] = UserID;
     userdata["username"] = req.body.username;
@@ -243,9 +244,9 @@
     userdata["phonenumber"] = req.body.phonenumber;
     var data = `{"action":"CREATE_USER","data":${JSON.stringify(userdata)}}`;
     var payload = JSON.parse(data);
-  
+
     sendRequest(payload, user.publickey, user.privatekey, function (err, result, transactionid) {
-    
+
         var batch_id_data = JSON.parse(result.body);
       //  console.log(batch_id_data);
         if (batch_id_data.link) {
@@ -270,4 +271,3 @@
 
   httpServer.listen(6380);
   httpsServer.listen(6381);
-
