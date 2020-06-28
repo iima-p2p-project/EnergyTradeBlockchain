@@ -17,10 +17,10 @@ async function  sendRequest(payload,publickey,privatekey,callback) {
 
  const payloadBytes = cbor.encode(payload)
  const transactionHeaderBytes = protobuf.TransactionHeader.encode({
-   familyName: 'ENERGYTRADING',
+   familyName: 'ENERGYTRADINGDR',
    familyVersion: '1.0',
-   inputs: ['fe9d87'],
-   outputs: ['fe9d87'],
+   inputs: ['c19056'],
+   outputs: ['c19056'],
    signerPublicKey: publickey, //signer.getPublicKey().asHex(),
    batcherPublicKey:publickey, //signer.getPublicKey().asHex(),
    dependencies: [],

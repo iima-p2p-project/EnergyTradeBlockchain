@@ -14,15 +14,7 @@ class EnergyTradeHandler extends TransactionHandler {
    let energytradestate = new EnergyTradeState(context);
    if (payload.action === 'CREATE_ORDER') {
      return energytradestate.createorder(payload.data)
-} else  if (payload.action === 'UPDATE_ORDER') {
-     return energytradestate.updateorder(payload.data)
-}
-else  if (payload.action === 'CANCEL_ORDER') {
-  return energytradestate.cancelorder(payload.data)
-}
-else  if (payload.action === 'ACCEPT_ORDER') {
-  return energytradestate.acceptorder(payload.data)
-}
+   }
 else  if (payload.action === 'START_TRADE') {
   return energytradestate.starttrade(payload.data)
 }
