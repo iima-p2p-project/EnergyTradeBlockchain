@@ -517,8 +517,8 @@ app.post("/api/startTrade", async(req, res) => {
   var SenderPrivateKey = req.body.sendersPrivatekey;
   const privateKeyUS = Buffer.from(SenderPrivateKey, "hex");
   var orderId = req.body.orderId;
-  var sellerMeterReading = req.body.sellerMeterReading;
-  var buyerMeterReading = req.body.buyerMeterReading;
+  var sellerMeterReading = 0;
+  var buyerMeterReading = 0;
 
 
   web3.eth.getTransactionCount(address, (err, txCount) => {
@@ -559,8 +559,8 @@ app.post("/api/endTrade", async(req, res) => {
   var SenderPrivateKey = req.body.sendersPrivatekey;
   const privateKeyUS = Buffer.from(SenderPrivateKey, "hex");
   var orderId = req.body.orderId;
-  var sellerMeterReading = req.body.sellerMeterReading;
-  var buyerMeterReading = req.body.buyerMeterReading;
+  var sellerMeterReading = 0;
+  var buyerMeterReading = 0;
 
 
   web3.eth.getTransactionCount(address, (err, txCount) => {
