@@ -46,7 +46,7 @@ const port = 3000;
 // myContract.NewOrderId().watch({}, '', function (error, result) {
 //   if(!error){
 //     console.log("Result = " , result);
-//   }  
+//   }
 // })
 
 app.get('/api/getseed',(req,res) => {
@@ -125,12 +125,12 @@ app.post("/api/sendETH", async (req, res) => {
     var SenderPrivateKey = req.body.sendersPrivatekey;
     console.log("Amount", amount);
     const privateKeyUS = Buffer.from(SenderPrivateKey, "hex");
-  
-  
+
+
    await web3.eth.getTransactionCount(sender, (err, txCount) => {
       console.log("In the Block");
       console.log("Error", err);
-  
+
       const txObject = {
         nonce: web3.utils.toHex(txCount),
         to: address,
@@ -140,12 +140,12 @@ app.post("/api/sendETH", async (req, res) => {
         gasPrice: web3.utils.toHex(web3.utils.toWei("45", "gwei")),
         chainId: 0x42,
       };
-  
+
       const tx = new Tx(txObject, { chain: "kovan", hardfork: "petersburg" });
       console.log("tx obj", tx);
       tx.sign(privateKeyUS);
       const serializedTransaction = tx.serialize();
-  
+
       console.log("serialized Transaction", serializedTransaction);
       const raw = "0x" + serializedTransaction.toString("hex");
       console.log("Raw Transaction", raw);
@@ -281,8 +281,8 @@ app.post("/api/createOrder", async(req, res) => {
           //   })
           // )
           // console.log("Receipt" + web3.eth.getTransactionReceipt(data));
-          
-        
+
+
         // try {
         //   myContract.methods
         //     .getOrderId()
@@ -512,7 +512,7 @@ app.post("/api/deleteOrder", async(req, res) => {
   });
 })
 
-app.post("/api/startTrade", getReading, async(req, res) => {
+app.post("/api/startTrade", async(req, res) => {
   var address = req.body.address;
   var SenderPrivateKey = req.body.sendersPrivatekey;
   const privateKeyUS = Buffer.from(SenderPrivateKey, "hex");
@@ -702,7 +702,7 @@ getReading = async function(req, res){
     var deviceId = data[3][0];
     var meterId = data[4][0];
     console.log(url, deviceId, meterId);
-    var response = axios.post("14.139.98.213:4013/agent/fetchTransactionData",{ 
+    var response = axios.post("14.139.98.213:4013/agent/fetchTransactionData",{
       "meterId": meterId,
       "timestamp": 2020
     });
