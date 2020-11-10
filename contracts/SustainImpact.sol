@@ -13,6 +13,7 @@ contract SustainImpact{
     
     struct Users{
         uint userId;
+        address userAddress;
         string username;
         string url;
         uint phoneNumber;
@@ -62,6 +63,7 @@ contract SustainImpact{
     
     function createUser(string memory _username, string memory _url, uint _phoneNumber, string memory _deviceId1, uint _meterId1, string memory _deviceId2, uint _meterId2) public{
        id += 1;
+       users[msg.sender].userAddress = msg.sender;
        users[msg.sender].userId = id;
        users[msg.sender].username = _username;
        users[msg.sender].url = _url;
@@ -71,6 +73,19 @@ contract SustainImpact{
        users[msg.sender].hwInfo[2].deviceId = _deviceId2;
        users[msg.sender].hwInfo[2].meterId = _meterId2;
        users[msg.sender].hwCount = 2;
+    }
+    
+    function updateUser(address _userAddress, string memory _username, string memory _url, uint _phoneNumber, string memory _deviceId1, uint _meterId1, string memory _deviceId2, uint _meterId2) public{
+       require(msg.sender == users[_userAddress].userAddress);
+       users[msg.sender].username = _username;
+       users[msg.sender].url = _url;
+       users[msg.sender].phoneNumber = _phoneNumber;
+       users[msg.sender].hwInfo[1].deviceId = _deviceId1;
+       users[msg.sender].hwInfo[1].meterId = _meterId1;
+       users[msg.sender].hwInfo[2].deviceId = _deviceId2;
+       users[msg.sender].hwInfo[2].meterId = _meterId2;
+       users[msg.sender].hwCount = 2;
+        
     }
     
     function getUser(address _userAddress) public view returns(string memory _username, string memory _url, uint _phoneNumber, string[] memory _deviceId, uint[] memory _meterId){
