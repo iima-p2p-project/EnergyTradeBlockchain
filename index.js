@@ -452,8 +452,8 @@ app.post("/api/updateOrder", async(req, res) => {
 })
 
 app.post("/api/acceptOrder", async(req, res) => {
-  var address = req.body.sellerAddress;
-  var SenderPrivateKey = req.body.sellerPrivatekey;
+  var address = req.body.buyerAddress;
+  var SenderPrivateKey = req.body.buyerPrivatekey;
   const privateKeyUS = Buffer.from(SenderPrivateKey, "hex");
   var orderId = req.body.orderId;
   var buyerDeviceId = req.body.buyerDeviceId;
@@ -580,7 +580,7 @@ app.post("/api/startTrade", async(req, res) => {
   var orderId = req.body.orderId;
   var buyerAddress = req.body.buyerAddress;
   var response = axios.post("http://localhost:3000/api/getReading", {
-    "address": req.body.address,
+    "address": req.body.sellerAddress,
     "buyerAddress":req.body.buyerAddress,
     "orderId":req.body.orderId
   }).then(function(data){
@@ -745,10 +745,14 @@ validateTrade = function(req, res){
         console.log("unit" + unit);
         var b_fine = 0;
         var sellerStartReading = data[1];
+        console.log("sellerStartReading", sellerStartReading);
         var sellerEndReading = data[3];
+        console.log("sellerEndReading", sellerEndReading);
         var p_produced = sellerEndReading - sellerStartReading;
+        console.log("p_produced", p_produced);
         var s_fine = 0;
         if((!isNaN(p_produced)) && (!isNaN(p_consumed))){
+          console.log("In if");
           if(p_produced < unit){
             s_fine = (unit - p_produced) * (data1[8] + 2.5);
             console.log("ShortFall Fine : " + s_fine);
@@ -759,6 +763,9 @@ validateTrade = function(req, res){
             res.json({Success:1, Status: "Order Validated", OverSupplyFine: s_fine})
           }else if(p_consumed > unit){
             b_fine = (p_consumed - unit) * 2.5;
+            console.log("OverConsumed Fine : " + b_fine);
+            res.json({Success:1, Status: "Order Validated", OverConsumedFine: b_fine})
+          }else if(p_consumed == unit){
             console.log("OverConsumed Fine : " + b_fine);
             res.json({Success:1, Status: "Order Validated", OverConsumedFine: b_fine})
           }
