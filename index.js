@@ -25,10 +25,8 @@ const myContract = new web3.eth.Contract(sustainImpact.abi, contractAddress, {
 const app = express();
 app.use(express.json());
 
-
 const port = 3000;
   
-
 app.get('/api/getseed',(req,res) => {
     try{
     var secretSeed = lightwallet.keystore.generateRandomSeed();
@@ -52,7 +50,6 @@ app.post('/api/checkSeed',(req,res)=>{
     res.json({Success:0,Error:errMsg})
   }
 })
-
 
 app.post('/api/new_wallet', (req, res) => {
     var password = req.body.password
@@ -152,6 +149,11 @@ app.post("/api/updateProfile", async(req, res) => {
   var meterId1 = req.body.meterId1;
   var deviceId2 = req.body.deviceId2;
   var meterId2 = req.body.meterId2;
+  var deviceId3 = req.body.deviceId3;
+  var meterId3 = req.body.meterId3;
+  var deviceId4 = req.body.deviceId4;
+  var meterId4 = req.body.meterId4;
+
 
   web3.eth.getTransactionCount(address, (err, txCount) => {
     console.log("In the Block");
@@ -161,7 +163,7 @@ app.post("/api/updateProfile", async(req, res) => {
       nonce: web3.utils.toHex(txCount),
       to: contractAddress,
       value: "0x00",
-      data: myContract.methods.updateUser(address, username, url, phoneNumber, deviceId1, meterId1, deviceId2, meterId2).encodeABI(),
+      data: (myContract.methods.updateUser(address, username, url, phoneNumber).encodeABI(), myContract.methods.updateDevices(address, deviceId1, meterId1, deviceId2, meterId2, deviceId3, meterId3, deviceId4, meterId4).encodeABI()),
       gasLimit: web3.utils.toHex(300000),
       gasPrice: web3.utils.toHex(web3.utils.toWei("45", "gwei")),
       chainId: 0x42,
@@ -262,6 +264,10 @@ app.post("/api/createUser", async (req, res) => {
               var meterId1 = req.body.meterId1;
               var deviceId2 = req.body.deviceId2;
               var meterId2 = req.body.meterId2;
+              var deviceId3 = req.body.deviceId3;
+              var meterId3 = req.body.meterId3;
+              var deviceId4 = req.body.deviceId4;
+              var meterId4 = req.body.meterId4;
 
               web3.eth.getTransactionCount(address, (err, txCount) => {
                 console.log("In the Block");
@@ -271,8 +277,8 @@ app.post("/api/createUser", async (req, res) => {
                   nonce: web3.utils.toHex(txCount),
                   to: contractAddress,
                   value: "0x00",
-                  data: myContract.methods.createUser(username, url, phoneNumber, deviceId1, meterId1, deviceId2, meterId2).encodeABI(),
-                  gasLimit: web3.utils.toHex(300000),
+                  data: myContract.methods.createUser(username, url, phoneNumber, deviceId1, meterId1, deviceId2, meterId2, deviceId3, meterId3, deviceId4, meterId4).encodeABI(),
+                  gasLimit: web3.utils.toHex(500000),
                   gasPrice: web3.utils.toHex(web3.utils.toWei("45", "gwei")),
                   chainId: 0x42,
                 };
@@ -335,7 +341,7 @@ app.post("/api/createOrder", async(req, res) => {
   var location = req.body.location;
   var amountOfPower = req.body.amountOfPower;
   var price = req.body.price;
-
+  
   web3.eth.getTransactionCount(address, (err, txCount) => {
 
     const txObject = {
@@ -457,7 +463,7 @@ app.post("/api/acceptOrder", async(req, res) => {
   const privateKeyUS = Buffer.from(SenderPrivateKey, "hex");
   var orderId = req.body.orderId;
   var buyerDeviceId = req.body.buyerDeviceId;
-
+  console.log("Hello");
 
   web3.eth.getTransactionCount(address, (err, txCount) => {
     console.log("In the Block");
@@ -493,7 +499,7 @@ app.post("/api/acceptOrder", async(req, res) => {
   });
 })
 
-app.post("/api/cancleOrder", async(req, res) => {
+app.post("/api/cancelOrder", async(req, res) => {
   var address = req.body.sellerAddress;
   var SenderPrivateKey = req.body.sellerPrivatekey;
   const privateKeyUS = Buffer.from(SenderPrivateKey, "hex");
@@ -508,7 +514,61 @@ app.post("/api/cancleOrder", async(req, res) => {
       nonce: web3.utils.toHex(txCount),
       to: contractAddress,
       value: "0x00",
-      data: myContract.methods.cancleOrder(orderId).encodeABI(),
+      data: myContract.methods.cancelOrder(orderId).encodeABI(),
+      gasLimit: web3.utils.toHex(300000),
+      gasPrice: web3.utils.toHex(web3.utils.toWei("45", "gwei")),
+      chainId: 0x42,
+    };
+    const tx = new Tx(txObject, { chain: "kovan", hardfork: "petersburg" });
+    console.log("tx obj", tx);
+    tx.sign(privateKeyUS);
+    const serializedTransaction = tx.serialize();
+
+    console.log("serialized Transaction", serializedTransaction);
+    const raw = "0x" + serializedTransaction.toString("hex");
+    console.log("Raw Transaction", raw);
+    web3.eth.sendSignedTransaction(raw, (err, txHash) => {
+      if (err) {
+        console.log("Error", err);
+        return res.json({ ERROR: "Error - Possibly because of insufficent ETH  " });
+      } else {
+        console.log("txHash:", txHash);
+        // return res.json({ Tx: txHash, From: address, Status: "Order Cancled"});
+      }
+    })
+    .on('receipt', function(receipt){
+      console.log(receipt);
+      myContract.methods
+            .getOrder(orderId)
+            .call()
+            .then(function (data) {
+              console.log(data);
+              res.json({sellerAddress : data[0], unit: data[1], energy: data[2], timeFrom: data[3], timeTo: data[4], sellerDeviceId: data[5], location: data[6], amountOfPower: data[7], price: data[8], buyerAddress: data[9], buyerDeviceId: data[10], status: data[11]});
+            })
+            .catch(function (err) {
+              console.log(err);
+              // res.json({ Success: 0, ERR: err });
+            })
+    });
+  });
+})
+
+app.post("/api/cancelContract", async(req, res) => {
+  var address = req.body.buyerAddress;
+  var SenderPrivateKey = req.body.buyerPrivatekey;
+  const privateKeyUS = Buffer.from(SenderPrivateKey, "hex");
+  var orderId = req.body.orderId;
+
+
+  web3.eth.getTransactionCount(address, (err, txCount) => {
+    console.log("In the Block");
+    console.log("Error", err);
+
+    const txObject = {
+      nonce: web3.utils.toHex(txCount),
+      to: contractAddress,
+      value: "0x00",
+      data: myContract.methods.cancelContract(orderId).encodeABI(),
       gasLimit: web3.utils.toHex(300000),
       gasPrice: web3.utils.toHex(web3.utils.toWei("45", "gwei")),
       chainId: 0x42,
@@ -679,49 +739,6 @@ app.post("/api/endTrade", async(req, res) => {
 
 })
 
-// app.post("/api/validateTrade", async(req, res) => {
-//   var address = req.body.address;
-//   var SenderPrivateKey = req.body.sendersPrivatekey;
-//   const privateKeyUS = Buffer.from(SenderPrivateKey, "hex");
-//   var orderId = req.body.orderId;
-//   var sellerFine = req.body.sellerFine;
-//   var buyerFine = req.body.buyerFine;
-
-
-//   web3.eth.getTransactionCount(address, (err, txCount) => {
-//     console.log("In the Block");
-//     console.log("Error", err);
-
-//     const txObject = {
-//       nonce: web3.utils.toHex(txCount),
-//       to: contractAddress,
-//       value: "0x00",
-//       data: myContract.methods.validateTrade(orderId, sellerFine, buyerFine).encodeABI(),
-//       gasLimit: web3.utils.toHex(300000),
-//       gasPrice: web3.utils.toHex(web3.utils.toWei("45", "gwei")),
-//       chainId: 0x42,
-//     };
-//     const tx = new Tx(txObject, { chain: "kovan", hardfork: "petersburg" });
-//     console.log("tx obj", tx);
-//     tx.sign(privateKeyUS);
-//     const serializedTransaction = tx.serialize();
-
-//     console.log("serialized Transaction", serializedTransaction);
-//     const raw = "0x" + serializedTransaction.toString("hex");
-//     console.log("Raw Transaction", raw);
-//     web3.eth.sendSignedTransaction(raw, (err, txHash) => {
-//       if (err) {
-//         console.log("Error", err);
-//         validateTrade(req.body.orderId);
-//         return res.json({ ERROR: "Error - Possibly because of insufficent ETH  " });
-//       } else {
-//         console.log("txHash:", txHash);
-//         return res.json({ Tx: txHash, From: address, Status: "Order Validate"});
-//       }
-//     });
-//   });
-// })
-
 validateTrade = function(req, res){
   var orderId = req.body.orderId;
   console.log(orderId);
@@ -825,6 +842,26 @@ getReading = async function(req, res){
         readings=response.data.meterData[0].meterReading;
         console.log(readings);
         return readings;
+      }else if(sellerDeviceId == data[3][2]){
+        sellerDeviceId = s_deviceId;
+        s_meterId = data1[4][2];
+        var response = axios.post("14.139.98.213:4013/agent/fetchTransactionData",{ 
+          "meterId": s_meterId,
+          "timestamp": Date.now()
+        });
+        readings=response.data.meterData[0].meterReading;
+        console.log(readings);
+        return readings;
+      }else if(sellerDeviceId == data[3][3]){
+        sellerDeviceId = s_deviceId;
+        s_meterId = data1[4][3];
+        var response = axios.post("14.139.98.213:4013/agent/fetchTransactionData",{ 
+          "meterId": s_meterId,
+          "timestamp": Date.now()
+        });
+        readings=response.data.meterData[0].meterReading;
+        console.log(readings);
+        return readings;
       }else{
         res.json({Status : "Seller Device is not matched"});
       }
@@ -877,6 +914,40 @@ getReading = async function(req, res){
             console.log("readings : " + buyer_readings);
             return buyer_readings;
           }
+        }else if(buyerDeviceId == data2[3][2]){
+          b_deviceId = data2[3][2];
+          b_meterId = data2[4][2];
+          console.log("Matched send for response Buyer", b_deviceId, b_meterId);
+          try{
+            var response = axios.post("14.139.98.213:4013/agent/fetchTransactionData",{ 
+              "meterId": b_meterId,
+              "timestamp": Date.now()
+            });
+            buyer_readings=response.data.meterData[0].meterReading;
+            console.log(buyer_readings);
+            return buyer_readings;
+          }catch(error){
+            buyer_readings = 0;
+            console.log("readings : " + buyer_readings);
+            return buyer_readings;
+          }
+        }else if(buyerDeviceId == data2[3][3]){
+          b_deviceId = data2[3][3];
+          b_meterId = data2[4][3];
+          console.log("Matched send for response Buyer", b_deviceId, b_meterId);
+          try{
+            var response = axios.post("14.139.98.213:4013/agent/fetchTransactionData",{ 
+              "meterId": b_meterId,
+              "timestamp": Date.now()
+            });
+            buyer_readings=response.data.meterData[0].meterReading;
+            console.log(buyer_readings);
+            return buyer_readings;
+          }catch(error){
+            buyer_readings = 0;
+            console.log("readings : " + buyer_readings);
+            return buyer_readings;
+          }
         }else{
           res.json({Status : "Seller Device is not matched"});
         }
@@ -886,28 +957,9 @@ getReading = async function(req, res){
   }).catch((error) =>{
       readings = 0;
       buyer_readings = 0;
+      console.log("Err : ", error);
       res.json({SellerMeter : readings, BuyerMeter : buyer_readings});
   });
-
-  // myContract.methods
-  // .getUser(address)
-  // .call()
-  // .then(function(data){
-  //   console.log(data);
-  //   var url = data[1];
-  //   var deviceId = data[3][0];
-  //   var meterId = data[4][0];
-  //   console.log(url, deviceId, meterId);
-  //   var response = axios.post("14.139.98.213:4013/agent/fetchTransactionData",{ 
-  //     "meterId": meterId,
-  //     "timestamp": 2020
-  //   });
-  //   readings=response.data.meterData[0].meterReading;
-  //   console.log(readings);
-  //   return readings;
-  // }).catch((error) =>{
-  //     readings = 0;
-  // });
 }
 
 app.post("/api/getReading", getReading);

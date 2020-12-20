@@ -61,7 +61,7 @@ contract SustainImpact{
         
     }
     
-    function createUser(string memory _username, string memory _url, uint _phoneNumber, string memory _deviceId1, uint _meterId1, string memory _deviceId2, uint _meterId2) public{
+    function createUser(string memory _username, string memory _url, uint _phoneNumber, string memory _deviceId1, uint _meterId1, string memory _deviceId2, uint _meterId2, string memory _deviceId3, uint _meterId3, string memory _deviceId4, uint _meterId4) public{
        id += 1;
        users[msg.sender].userAddress = msg.sender;
        users[msg.sender].userId = id;
@@ -72,20 +72,31 @@ contract SustainImpact{
        users[msg.sender].hwInfo[1].meterId = _meterId1;
        users[msg.sender].hwInfo[2].deviceId = _deviceId2;
        users[msg.sender].hwInfo[2].meterId = _meterId2;
-       users[msg.sender].hwCount = 2;
+       users[msg.sender].hwInfo[3].deviceId = _deviceId3;
+       users[msg.sender].hwInfo[3].meterId = _meterId3;
+       users[msg.sender].hwInfo[4].deviceId = _deviceId4;
+       users[msg.sender].hwInfo[4].meterId = _meterId4;
+       users[msg.sender].hwCount = 4;
     }
     
-    function updateUser(address _userAddress, string memory _username, string memory _url, uint _phoneNumber, string memory _deviceId1, uint _meterId1, string memory _deviceId2, uint _meterId2) public{
+    function updateUser(address _userAddress, string memory _username, string memory _url, uint _phoneNumber) public{
        require(msg.sender == users[_userAddress].userAddress);
        users[msg.sender].username = _username;
        users[msg.sender].url = _url;
        users[msg.sender].phoneNumber = _phoneNumber;
+    }
+    
+    function updateDevices(address _userAddress, string memory _deviceId1, uint _meterId1, string memory _deviceId2, uint _meterId2, string memory _deviceId3, uint _meterId3, string memory _deviceId4, uint _meterId4) public{
+       require(msg.sender == users[_userAddress].userAddress);
        users[msg.sender].hwInfo[1].deviceId = _deviceId1;
        users[msg.sender].hwInfo[1].meterId = _meterId1;
        users[msg.sender].hwInfo[2].deviceId = _deviceId2;
        users[msg.sender].hwInfo[2].meterId = _meterId2;
-       users[msg.sender].hwCount = 2;
-        
+       users[msg.sender].hwInfo[3].deviceId = _deviceId3;
+       users[msg.sender].hwInfo[3].meterId = _meterId3;
+       users[msg.sender].hwInfo[4].deviceId = _deviceId4;
+       users[msg.sender].hwInfo[4].meterId = _meterId4;
+       users[msg.sender].hwCount = 4;
     }
     
     function getUser(address _userAddress) public view returns(string memory _username, string memory _url, uint _phoneNumber, string[] memory _deviceId, uint[] memory _meterId){
@@ -161,7 +172,7 @@ contract SustainImpact{
     function acceptOrder(uint _orderId, string memory _buyerDeviceId) public returns(string memory ){
         require(orders[_orderId].userAddress != msg.sender, "You are creator of this order");
         require(keccak256(abi.encodePacked((orders[_orderId].status))) != keccak256(abi.encodePacked(("Accepted"))), "Order is already accepted ");
-        require(keccak256(abi.encodePacked((orders[_orderId].status))) != keccak256(abi.encodePacked(("Cancled"))), "Order is Cancled ");
+        require(keccak256(abi.encodePacked((orders[_orderId].status))) != keccak256(abi.encodePacked(("Cancelled"))), "Order is Cancelled ");
 
         string memory _msg = "Order Accepted";
         orders[_orderId].buyerAddress = msg.sender;
@@ -170,11 +181,18 @@ contract SustainImpact{
         return _msg;
     }
     
-    function cancleOrder(uint _orderId) public returns(string memory){
+    function cancelOrder(uint _orderId) public returns(string memory){
         require(orders[_orderId].userAddress == msg.sender, "You are not creator of this order");
         
         string memory _msg = "Order Cancled";
-        orders[_orderId].status = "Cancled";
+        orders[_orderId].status = "Cancelled";
+        return _msg;
+    }
+    
+    function cancelContract(uint _orderId) public returns(string memory){
+        require(orders[_orderId].buyerAddress == msg.sender, "You have no permission to access this");
+        string memory _msg = "Contract Cancelled";
+        orders[_orderId].status = "Contract Cancelled";
         return _msg;
     }
     
