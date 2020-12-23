@@ -587,7 +587,7 @@ app.post("/api/cancelContract", async(req, res) => {
         return res.json({ ERROR: "Error - Possibly because of insufficent ETH  " });
       } else {
         console.log("txHash:", txHash);
-        return res.json({ Tx: txHash, From: address, Status: "Order Cancled"});
+        return res.json({ Tx: txHash, From: address, Status: "Contract Cancelled"});
       }
     });
   });
