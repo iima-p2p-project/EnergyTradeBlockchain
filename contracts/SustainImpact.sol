@@ -192,7 +192,9 @@ contract SustainImpact{
     function cancelContract(uint _orderId) public returns(string memory){
         require(orders[_orderId].buyerAddress == msg.sender, "You have no permission to access this");
         string memory _msg = "Contract Cancelled";
-        orders[_orderId].status = "Contract Cancelled";
+        orders[_orderId].status = "Created";
+        orders[_orderId].buyerAddress = address(0);
+        orders[_orderId].buyerDeviceId = "";
         return _msg;
     }
     
